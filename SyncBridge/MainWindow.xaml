@@ -1,0 +1,524 @@
+﻿<Window x:Class="SyncBridge.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sync Manager" Height="650" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F3FF"
+        Loaded="MainWindow_Loaded">
+
+    <Window.Resources>
+
+        <!-- Brushes / Farben -->
+        <SolidColorBrush x:Key="BgBrush" Color="#F5F3FF"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#1E293B"/>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#8B5CF6"/>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="#A78BFA"/>
+        <SolidColorBrush x:Key="BorderSoftBrush" Color="#E2E8F0"/>
+
+        <SolidColorBrush x:Key="AsideBrush" Color="#1E293B"/>
+        <SolidColorBrush x:Key="AsideTextBrush" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="AsideMutedBrush" Color="#94A3B8"/>
+
+        <!-- Schatten -->
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="12" ShadowDepth="2" Opacity="0.18"/>
+
+        <!-- Card -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+        </Style>
+
+        <!-- kompaktere Card für Settings -->
+        <Style x:Key="SettingsCardStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Chip -->
+        <Style x:Key="ChipBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Background" Value="#33A78BFA"/>
+        </Style>
+
+        <Style x:Key="ChipTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Buttons -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="26,14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="22,12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                        CornerRadius="10"
+                        Padding="{TemplateBinding Padding}">
+                            <ContentPresenter
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Tabs: wie "Buttons" oben -->
+        <Style TargetType="TabItem">
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Bd"
+                        Background="{StaticResource BgBrush}"
+                        BorderThickness="0,0,0,3"
+                        BorderBrush="Transparent"
+                        CornerRadius="10,10,0,0"
+                        Padding="{TemplateBinding Padding}">
+                            <!-- WICHTIG: Header anzeigen -->
+                            <ContentPresenter ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter TargetName="Bd" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Log -->
+        <Style x:Key="LogTextStyle" TargetType="ItemsControl">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource AsideTextBrush}"/>
+        </Style>
+
+        <!-- Radio Option Box (kompakter) -->
+        <Style x:Key="RadioOptionCardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderSoftBrush}"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="#40A78BFA"
+                BorderThickness="0,0,0,1"
+                Padding="18,14">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="↻" FontSize="24" Margin="0,0,10,0" Foreground="{StaticResource TextBrush}"/>
+                    <TextBlock Text="SyncBridge" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Hauptbereich -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="7*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Log Panel (links) -->
+            <Grid Grid.Column="0" Background="{StaticResource AsideBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        BorderBrush="#40A78BFA"
+                        BorderThickness="0,0,0,1"
+                        Padding="14,12">
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="Sync Logs"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource AsideTextBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <Button Content="🗑"
+                                ToolTip="Logs löschen"
+                                Margin="12,0,0,0"
+                                Padding="8,4"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="{StaticResource AsideMutedBrush}"
+                                Cursor="Hand"
+                                Click="ClearLogs_Click"/>
+                    </DockPanel>
+                </Border>
+
+                <Border Grid.Row="1" Margin="14"
+                        Background="{StaticResource AsideBrush}"
+                        BorderBrush="#334155"
+                        BorderThickness="1"
+                        CornerRadius="10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
+                        <ItemsControl x:Name="LogItems"
+              Style="{StaticResource LogTextStyle}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,4"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <!-- Rechter Bereich: genau 2 Tabs -->
+            <Grid Grid.Column="1" Margin="18">
+                <TabControl>
+
+                    <!-- TAB 1: Hauptbereich -->
+                    <TabItem Header="Synchronisation">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="10">
+
+                                <Button x:Name="SyncAllButton"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Margin="0,0,0,18"
+                                        Click="SyncAllButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="↻" FontSize="20" Margin="0,0,10,0"/>
+                                        <TextBlock Text="Sync All" FontSize="18"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Products Card -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Products" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,8"/>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Border Style="{StaticResource ChipBorderStyle}">
+                                                    <TextBlock x:Name="ProductsSourceText" Style="{StaticResource ChipTextStyle}" Text="Dolibarr"/>
+                                                </Border>
+                                                <TextBlock Text="→" FontSize="18" FontWeight="Bold" Margin="12,0" Foreground="{StaticResource TextBrush}"/>
+                                                <Border Style="{StaticResource ChipBorderStyle}">
+                                                    <TextBlock x:Name="ProductsTargetText" Style="{StaticResource ChipTextStyle}" Text="Smartstore"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Content="Sync Products"
+                                                Margin="16,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Click="SyncProducts_Click"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Customer Card -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Customer" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,8"/>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Border Style="{StaticResource ChipBorderStyle}">
+                                                    <TextBlock x:Name="CustomerSourceText" Style="{StaticResource ChipTextStyle}" Text="Smartstore"/>
+                                                </Border>
+                                                <TextBlock Text="→" FontSize="18" FontWeight="Bold" Margin="12,0" Foreground="{StaticResource TextBrush}"/>
+                                                <Border Style="{StaticResource ChipBorderStyle}">
+                                                    <TextBlock x:Name="CustomerTargetText" Style="{StaticResource ChipTextStyle}" Text="Dolibarr"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Content="Sync Customer"
+                                                Margin="16,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Click="SyncCustomer_Click"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Orders Card -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Orders" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,8"/>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Border Style="{StaticResource ChipBorderStyle}">
+                                                    <TextBlock x:Name="OrdersSourceText" Style="{StaticResource ChipTextStyle}" Text="Smartstore"/>
+                                                </Border>
+                                                <TextBlock Text="→" FontSize="18" FontWeight="Bold" Margin="12,0" Foreground="{StaticResource TextBrush}"/>
+                                                <Border Style="{StaticResource ChipBorderStyle}">
+                                                    <TextBlock x:Name="OrdersTargetText" Style="{StaticResource ChipTextStyle}" Text="Dolibarr"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Content="Sync Orders"
+                                                Margin="16,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Click="SyncOrders_Click"/>
+                                    </Grid>
+                                </Border>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- TAB 2: Einstellungen -->
+                    <TabItem Header="Einstellungen">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="10">
+
+                                <!-- kleinere Überschrift (passt immer) -->
+                                <TextBlock Text="Sync-Richtungen konfigurieren"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,10"
+                                           TextWrapping="Wrap"/>
+
+                                <!-- Products Settings -->
+                                <Border Style="{StaticResource SettingsCardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Products" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,8"/>
+
+                                        <Border Style="{StaticResource RadioOptionCardStyle}">
+                                            <DockPanel>
+                                                <RadioButton GroupName="ProductsDirection"
+                                                             IsChecked="True"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,12,0"
+                                                             Checked="ProductsForward_Checked"/>
+                                                <TextBlock Text="Dolibarr → Smartstore"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+
+                                        <Border Style="{StaticResource RadioOptionCardStyle}" Margin="0">
+                                            <DockPanel>
+                                                <RadioButton GroupName="ProductsDirection"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,12,0"
+                                                             Checked="ProductsBackward_Checked"/>
+                                                <TextBlock Text="Smartstore → Dolibarr"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Customer Settings -->
+                                <Border Style="{StaticResource SettingsCardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Customer" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,8"/>
+
+                                        <Border Style="{StaticResource RadioOptionCardStyle}">
+                                            <DockPanel>
+                                                <RadioButton GroupName="CustomerDirection"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,12,0"
+                                                             Checked="CustomerForward_Checked"/>
+                                                <TextBlock Text="Dolibarr → Smartstore"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+
+                                        <Border Style="{StaticResource RadioOptionCardStyle}" Margin="0">
+                                            <DockPanel>
+                                                <RadioButton GroupName="CustomerDirection"
+                                                             IsChecked="True"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,12,0"
+                                                             Checked="CustomerBackward_Checked"/>
+                                                <TextBlock Text="Smartstore → Dolibarr"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Orders Settings -->
+                                <Border Style="{StaticResource SettingsCardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Orders" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,8"/>
+
+                                        <Border Style="{StaticResource RadioOptionCardStyle}">
+                                            <DockPanel>
+                                                <RadioButton GroupName="OrdersDirection"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,12,0"
+                                                             Checked="OrdersForward_Checked"/>
+                                                <TextBlock Text="Dolibarr → Smartstore"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+
+                                        <Border Style="{StaticResource RadioOptionCardStyle}" Margin="0">
+                                            <DockPanel>
+                                                <RadioButton GroupName="OrdersDirection"
+                                                             IsChecked="True"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,12,0"
+                                                             Checked="OrdersBackward_Checked"/>
+                                                <TextBlock Text="Smartstore → Dolibarr"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                                <!-- Sync-Intervall Settings -->
+                                <Border Style="{StaticResource SettingsCardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Synchronisationsintervall"
+                   FontSize="15"
+                   FontWeight="Bold"
+                   Foreground="{StaticResource TextBrush}"
+                   Margin="0,0,0,8"/>
+
+                                        <!-- AUS -->
+                                        <Border Style="{StaticResource RadioOptionCardStyle}">
+                                            <DockPanel>
+                                                <RadioButton x:Name="AutoSyncOffRadio"
+                             GroupName="AutoSyncMode"
+                             IsChecked="True"
+                             Margin="0,0,12,0"
+                             VerticalAlignment="Center"
+                             Checked="AutoSyncOff_Checked"/>
+                                                <TextBlock Text="Aus"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextBrush}"
+                           TextWrapping="Wrap"/>
+                                            </DockPanel>
+                                        </Border>
+
+                                        <!-- INTERVALL -->
+                                        <Border Style="{StaticResource RadioOptionCardStyle}" Margin="0">
+                                            <DockPanel VerticalAlignment="Center">
+
+                                                <RadioButton x:Name="AutoSyncIntervalRadio"
+                             GroupName="AutoSyncMode"
+                             Margin="0,0,12,0"
+                             VerticalAlignment="Center"
+                             Checked="AutoSyncInterval_Checked"/>
+
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="Alle"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextBrush}"
+                               Margin="0,0,6,0"/>
+
+                                                    <TextBox x:Name="AutoSyncIntervalTextBox"
+                             Width="60"
+                             Text="15"
+                             IsEnabled="False"
+                             VerticalContentAlignment="Center"
+                             HorizontalContentAlignment="Center"
+                             Margin="0,0,6,0"
+                            TextChanged="AutoSyncIntervalTextBox_TextChanged"
+                             />
+
+                                                    <TextBlock Text="Minuten synchronisieren"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextBrush}"/>
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Border>
+
+
+                                    </StackPanel>
+                                </Border>
+
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                </TabControl>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,13 @@
+
+
+{
+  "Dolibarr": {
+    "BaseUrl": "http://localhost:8080",
+    "ApiKey": "__DOLIBARR_API_KEY__"
+  },
+  "Smartstore": {
+    "BaseUrl": "http://localhost:5000",
+    "PublicKey": "__SMARTSTORE_PUBLIC_KEY__",
+    "SecretKey": "__SMARTSTORE_SECRET_KEY__"
+  }
+}
